@@ -1,0 +1,3 @@
+https://www.pysimplegui.org/en/latest/
+https://github.com/israel-dryer/Media-Player/blob/master/vlc_media_player.py#L79
+https://github.com/PySimpleGUI/PySimpleGUI/blob/master/DemoPrograms/Demo_Media_Player_VLC_Based.py
