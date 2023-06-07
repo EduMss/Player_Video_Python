@@ -2,7 +2,6 @@ import vlc #pip install python-vlc
 import PySimpleGUI as sg #pip install PySimpleGUI
 import os
 from sys import platform as PLATFORM
-import time
 
 # sg.theme_previewer()# visualizar todos os temas disponiveis
 
@@ -27,18 +26,13 @@ AssetsListaDic = Procurar_Assets().getAssetsListaDic()
 
 class PlayerVideo:
     def __init__(self, size, Video, tema):
-        # self.caminhoVideo = os.path.join(os.path.dirname(__file__), Video)
-        print(Video)
         self.caminhoVideo = Video
-
         self.tema = tema #para ficar disponivel me toda a classe PlayerVideo
         self.player_size = [x*.85 for x in size]  # The size of the media output window
         self.cor_background = sg.LOOK_AND_FEEL_TABLE[self.tema]['BACKGROUND']
 
         layout = [
             [sg.Image('', size=self.player_size, pad=(0, 5), key='-VID_OUT-')],
-            # :param relief: relief style. Use constants - RELIEF_RAISED RELIEF_SUNKEN RELIEF_FLAT RELIEF_RIDGE RELIEF_GROOVE RELIEF_SOLID
-            # bad relief "RELIEF_RAISED": must be flat, groove, raised, ridge, solid, or sunken
             [sg.Slider(range=(0, 1), enable_events=True, resolution=0.0001, disable_number_display=True,
                        background_color='#83D8F5', orientation='h', key='TimeProgresso', relief='flat', border_width= 1)],
 
@@ -78,7 +72,6 @@ class PlayerVideo:
                 tempoAssistido = "{:02d}:{:02d}:{:02d}".format(tempoHora,*Tempo)
             else:
                 tempoAssistido = "{:02d}:{:02d}".format(*Tempo)
-
             
             Tempo = divmod(self.player.get_length() // 1000, 60)
             if Tempo[0] > 59:
@@ -90,7 +83,6 @@ class PlayerVideo:
 
             self.window['TimeProgresso'].update(self.player.get_position())
             self.window['TimeNumero'].update(f'{tempoAssistido} / {tempoTotal}')
-# PorcentagemVolume
 
     def AtualizandoVolumeInfo(self, volume):
         volumePorcentagem = f'{volume}%'
@@ -112,7 +104,6 @@ class PlayerVideo:
         iniciar = True
         while rodando:
             while iniciar:
-                # time.sleep(0.5)#Tive que colocar esse time, pois tava dando erro ao atualizar as informações abaixo
                 if self.player.is_playing:
                     self.AtualizandoVideoInfo()
                     self.VolumeInicial()
@@ -120,11 +111,9 @@ class PlayerVideo:
                     self.AtualizandoVolumeInfo(int(volume))
                     iniciar = False
                     break
-            
             self.event, self.value = self.window.read(timeout=1000)
             self.AtualizandoVideoInfo()
             
-
             if self.event == sg.WIN_CLOSED:
                 rodando = False
                 break
@@ -145,7 +134,6 @@ class PlayerVideo:
                 self.player.audio_set_volume(int(volume))
                 self.AtualizandoVolumeInfo(int(volume))
                 
-
             elif self.event == "Mutar":
                 self.player.audio_set_mute(not self.player.audio_get_mute())
                 if self.player.audio_get_mute():
@@ -164,9 +152,7 @@ class PlayerVideo:
                 if self.player.is_playing():
                     self.window['Pausar'].update(image_filename=AssetsListaDic['play'])
                 else:
-                    self.window['Pausar'].update(image_filename=AssetsListaDic['pause'])
-
-                
+                    self.window['Pausar'].update(image_filename=AssetsListaDic['pause'])                
 
             elif self.event == "Parar":
                 self.AtualizandoVideoInfo()
@@ -190,9 +176,7 @@ class TelaInicial:
         layout = [
             [sg.Input(disabled=True, key='-INPUT-'), 
              sg.Button(key='ArquivoVideo',image_filename=AssetsListaDic["arquivo"], image_size=(40,40)),
-             sg.Button(key='NovaPasta',image_filename=AssetsListaDic["pasta"], image_size=(40,40)),
-             ],
-
+             sg.Button(key='NovaPasta',image_filename=AssetsListaDic["pasta"], image_size=(40,40))],
             [sg.Listbox(values=[], size=(30, 6), key='List')],
             [sg.Button("abrir", key="abrir", size=(5,2))]
         ]
@@ -209,7 +193,7 @@ class TelaInicial:
                 for formato in self.formatosAceitos:
                     if file.endswith(formato):
                         self.ListaVideos.append(file)
-            self.ListaCaminhoVideo = os.path.join(__file__)
+            self.ListaCaminhoVideo = os.path.join(os.path.dirname(__file__))
             self.window['List'].update(self.ListaVideos)
         else : 
             for file in os.listdir(pasta):
@@ -224,7 +208,6 @@ class TelaInicial:
         rodando = True
         while rodando:
             self.event, self.value = self.window.read(timeout=1000)
-
             if self.event == sg.WIN_CLOSED:
                 rodando = False
                 self.Abrir = ""
@@ -233,23 +216,16 @@ class TelaInicial:
             elif self.event == 'ArquivoVideo':
                 file = sg.popup_get_file('', multiple_files=False, no_window=True)
                 if file:
-                    print(file)
                     self.window.close()
-                    # PlayerVideo(size=(1920,1080), Video = file, tema=self.tema).funcoes()
-
                     self.caminhoVideo = os.path.join(self.ListaCaminhoVideo, file)
                     PlayerVideo(size=(1920,1080), Video = self.caminhoVideo, tema=self.tema).funcoes()
-
                 else:
                     self.window['-INPUT-'].update('')
 
             elif self.event == 'NovaPasta':
-                # pasta = sg.popup_get_file('', multiple_files=False, no_window=True)
                 pasta = sg.popup_get_folder('', no_window=True)
                 if pasta:
                     self.window['-INPUT-'].update(pasta)
-                    print(pasta)
-
                     self.Procurar_Videos(pasta)
                 else:
                     self.window['-INPUT-'].update('')
